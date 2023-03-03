@@ -1,6 +1,7 @@
 const Product = require("../models/Product");
 const formidable = require("formidable");
 const fs = require("fs");
+const _ = require("lodash");
 
 exports.addProduct = (req, res, next) => {
   let form = new formidable.IncomingForm();
@@ -67,13 +68,59 @@ exports.getAllProducts = (req, res) => {
 
 exports.deleteProduct = (req, res) => {
   const _id = req.params.id;
-  Product.findByIdAndDelete(_id).then(() => {
-    return res.json({ 
-        message: "successfully deleted" 
+  Product.findByIdAndDelete(_id)
+    .then(() => {
+      return res.json({
+        message: "successfully deleted",
+      });
+    })
+    .catch((err) => {
+      console.log(err);
     });
-  }).catch(err => {
-    console.log(err);
-  })
+};
+
+exports.editProduct = (req, res, next) => {
+  let _id = req.params.id;
+  Product.findOne({ _id: _id })
+    .then((p) => {
+      let form = new formidable.IncomingForm();
+      form.keepExtensions = true;
+      form.parse(req, (err, fields, files) => {
+        if (err) {
+          return res.status(400).json({
+            error: "Image could not upload",
+          });
+        }
+
+        p = _.merge(p, fields);
+
+        if (files.photo) {
+          if (files.photo.size > 20000000) {
+            return res.status(400).json({
+              error: "Image should be less then 2mb in size",
+            });
+          }
+          p.photo.data = fs.readFileSync(files.photo.filepath);
+          p.photo.contentType = files.photo.type;
+        }
+
+        p.save()
+          .then((result) => {
+            return res.status(200).json({
+              message: "updated-successfully",
+              result : result
+            });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      });
+    })
+    .catch((err) => {
+      return res.status(400).json({
+        error: err,
+      });
+    });
 };
 
 exports.photo = (req, res, next) => {
