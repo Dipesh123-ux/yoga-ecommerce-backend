@@ -108,7 +108,7 @@ exports.editProduct = (req, res, next) => {
           .then((result) => {
             return res.status(200).json({
               message: "updated-successfully",
-              result : result
+              result: result,
             });
           })
           .catch((error) => {
@@ -121,6 +121,19 @@ exports.editProduct = (req, res, next) => {
         error: err,
       });
     });
+};
+
+exports.singleProduct = (req, res) => {
+  const _id = req.params.id;
+  Product.findOne({ _id: _id }).then((p) => {
+     return res.status(200).json({
+      product: p
+     })
+  }).catch((err) => {
+     return res.status(400).json({
+       error : err
+     })
+  })
 };
 
 exports.photo = (req, res, next) => {
