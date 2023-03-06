@@ -123,6 +123,23 @@ exports.editProduct = (req, res, next) => {
     });
 };
 
+
+exports.getProductByCategory = (req,res,next)=>{
+   let category = req.params.category.toString();
+   console.log(category);
+   Product.find({category: category}).then((p)=>{
+     return res.status(200).json({
+      products : p,
+      message : "success"
+     })
+   }).catch((err)=>{
+     return res.status(400).json({
+       message : "error",
+       error : err
+     })
+   })
+}
+
 exports.singleProduct = (req, res) => {
   const _id = req.params.id;
   Product.findOne({ _id: _id }).then((p) => {
@@ -145,7 +162,7 @@ exports.photo = (req, res, next) => {
     })
     .catch((err) => {
       return res.status(400).json({
-        error: err,
+        error: err, 
       });
     });
 };
